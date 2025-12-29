@@ -1,0 +1,31 @@
+name: Daily OSHA Digest
+
+on:
+  schedule:
+    # Run at 6:00 AM Central Time (12:00 UTC) every day
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    # Allow manual trigger for testing
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests python-dateutil resend
+
+      - name: Send daily digest
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+        run: python email_digest.py
