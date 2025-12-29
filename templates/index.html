@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSHA Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OSHA Monitor</h1>
+            <p class="date">{{ today }}</p>
+            <p class="subtitle">Comprehensive OSHA regulatory updates</p>
+        </header>
+
+        {% if error %}
+        <div class="error-message">
+            <p>Unable to load updates right now. Please try again in a few minutes.</p>
+        </div>
+        {% else %}
+
+        <div class="filters">
+            <div class="filter-row">
+                <span class="filter-label">Show:</span>
+                <a href="?content=all&year={{ year }}" class="filter-link {% if content_filter == 'all' %}active{% endif %}">All</a>
+                <a href="?content=rules&year={{ year }}" class="filter-link {% if content_filter == 'rules' %}active{% endif %}">Final Rules</a>
+                <a href="?content=proposed&year={{ year }}" class="filter-link {% if content_filter == 'proposed' %}active{% endif %}">Proposed</a>
+                <a href="?content=interpretations&year={{ year }}" class="filter-link {% if content_filter == 'interpretations' %}active{% endif %}">Interpretations</a>
+                <a href="?content=directives&year={{ year }}" class="filter-link {% if content_filter == 'directives' %}active{% endif %}">Directives</a>
+            </div>
+            <div class="filter-row">
+                <span class="filter-label">Year:</span>
+                <a href="?content={{ content_filter }}&year={{ current_year }}" class="filter-link {% if year == current_year|string %}active{% endif %}">{{ current_year }}</a>
+                <a href="?content={{ content_filter }}&year={{ current_year - 1 }}" class="filter-link {% if year == (current_year - 1)|string %}active{% endif %}">{{ current_year - 1 }}</a>
+                <a href="?content={{ content_filter }}&year=all" class="filter-link {% if year == 'all' %}active{% endif %}">All Time</a>
+            </div>
+        </div>
+
+        {% if total_count > 0 %}
+        <p class="result-count">{{ total_count }} item{{ 's' if total_count != 1 else '' }} found</p>
+        {% endif %}
+
+        {% if final_rules %}
+        <section class="rules-section">
+            <h2>Final Rules</h2>
+            <p class="section-description">Enforceable regulations. Check effective dates for compliance deadlines.</p>
+
+            <div class="rules-list">
+                {% for rule in final_rules %}
+                <article class="rule-card">
+                    <div class="rule-meta">
+                        <span class="content-tag tag-rule">Rule</span>
+                        <span class="rule-date">{{ rule.time_ago }}</span>
+                        {% if rule.effective_status %}
+                        <span class="effective-date">{{ rule.effective_status }}</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="rule-title">
+                        <a href="{{ rule.url }}" target="_blank" rel="noopener">{{ rule.title }}</a>
+                    </h3>
+                    {% if rule.abstract %}
+                    <p class="rule-abstract">{{ rule.abstract }}</p>
+                    {% endif %}
+                    <div class="rule-links">
+                        <a href="{{ rule.url }}" target="_blank" rel="noopener">Read Full Text</a>
+                        {% if rule.pdf_url %}
+                        <a href="{{ rule.pdf_url }}" target="_blank" rel="noopener">PDF</a>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if proposed_rules %}
+        <section class="rules-section">
+            <h2>Proposed Rules</h2>
+            <p class="section-description">Not yet enforceable. These may be open for public comment.</p>
+
+            <div class="rules-list">
+                {% for rule in proposed_rules %}
+                <article class="rule-card">
+                    <div class="rule-meta">
+                        <span class="content-tag tag-proposed">Proposed</span>
+                        <span class="rule-date">{{ rule.time_ago }}</span>
+                    </div>
+                    <h3 class="rule-title">
+                        <a href="{{ rule.url }}" target="_blank" rel="noopener">{{ rule.title }}</a>
+                    </h3>
+                    {% if rule.abstract %}
+                    <p class="rule-abstract">{{ rule.abstract }}</p>
+                    {% endif %}
+                    <div class="rule-links">
+                        <a href="{{ rule.url }}" target="_blank" rel="noopener">Read Full Text</a>
+                        {% if rule.pdf_url %}
+                        <a href="{{ rule.pdf_url }}" target="_blank" rel="noopener">PDF</a>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if interpretations %}
+        <section class="rules-section">
+            <h2>Letters of Interpretation</h2>
+            <p class="section-description">Official OSHA guidance on how standards apply to specific situations.</p>
+
+            <div class="rules-list">
+                {% for item in interpretations %}
+                <article class="rule-card">
+                    <div class="rule-meta">
+                        <span class="content-tag tag-interpretation">Interpretation</span>
+                        <span class="rule-date">{{ item.time_ago }}</span>
+                    </div>
+                    <h3 class="rule-title">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+                    </h3>
+                    {% if item.abstract %}
+                    <p class="rule-abstract">{{ item.abstract }}</p>
+                    {% endif %}
+                    <div class="rule-links">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener">Read Full Text</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if directives %}
+        <section class="rules-section">
+            <h2>Directives</h2>
+            <p class="section-description">Enforcement policies, national emphasis programs, and compliance procedures.</p>
+
+            <div class="rules-list">
+                {% for item in directives %}
+                <article class="rule-card">
+                    <div class="rule-meta">
+                        <span class="content-tag tag-directive">Directive</span>
+                        <span class="rule-date">{{ item.time_ago }}</span>
+                    </div>
+                    <h3 class="rule-title">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+                    </h3>
+                    {% if item.abstract %}
+                    <p class="rule-abstract">{{ item.abstract }}</p>
+                    {% endif %}
+                    <div class="rule-links">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener">Read Full Text</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if notices and content_filter == 'all' %}
+        <section class="rules-section">
+            <h2>Notices</h2>
+            <p class="section-description">Informational notices and announcements.</p>
+
+            <div class="rules-list">
+                {% for item in notices %}
+                <article class="rule-card">
+                    <div class="rule-meta">
+                        <span class="content-tag tag-notice">Notice</span>
+                        <span class="rule-date">{{ item.time_ago }}</span>
+                    </div>
+                    <h3 class="rule-title">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+                    </h3>
+                    {% if item.abstract %}
+                    <p class="rule-abstract">{{ item.abstract }}</p>
+                    {% endif %}
+                    <div class="rule-links">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener">Read Full Text</a>
+                        {% if item.pdf_url %}
+                        <a href="{{ item.pdf_url }}" target="_blank" rel="noopener">PDF</a>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if not final_rules and not proposed_rules and not interpretations and not directives and not notices %}
+        <div class="no-results">
+            <p>No updates found{% if year != 'all' %} for {{ year }}{% endif %}.</p>
+            {% if year != 'all' %}
+            <p class="suggestion">Try viewing <a href="?content={{ content_filter }}&year=all">all time</a>.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+        <footer>
+            <p>Data from the <a href="https://www.federalregister.gov/agencies/occupational-safety-and-health-administration" target="_blank" rel="noopener">Federal Register</a> and <a href="https://www.osha.gov" target="_blank" rel="noopener">OSHA.gov</a></p>
+        </footer>
+    </div>
+</body>
+</html>
