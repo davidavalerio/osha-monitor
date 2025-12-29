@@ -231,7 +231,45 @@ def build_email_text(documents):
     return text
 
 
-def send_digest(days=1):
+def build_test_email_html():
+    """Build a simple test/confirmation email."""
+    today = datetime.now().strftime("%A, %B %d, %Y")
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #1a365d; font-size: 24px; margin-bottom: 5px;">OSHA Monitor</h1>
+        <p style="color: #666; margin-top: 0;">{today}</p>
+
+        <div style="background: #f0fff4; padding: 20px; border-radius: 8px; border-left: 4px solid #38a169; margin: 20px 0;">
+            <p style="margin: 0; font-size: 16px; color: #276749;">
+                <strong>Your email alerts are working.</strong>
+            </p>
+            <p style="margin: 10px 0 0 0; color: #555;">
+                You'll receive an email each morning at 6 AM Central when new OSHA regulations are published.
+            </p>
+        </div>
+
+        <p style="color: #666;">
+            No new regulatory updates were published recently, but when they are, they'll appear here with direct links to the official documents.
+        </p>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        <p style="font-size: 13px; color: #888; text-align: center;">
+            <a href="https://osha-monitor.onrender.com" style="color: #3182ce;">View all updates</a> ·
+            Sent by OSHA Monitor
+        </p>
+    </body>
+    </html>
+    """
+
+
+def send_digest(days=1, is_test=False):
     """Fetch recent documents and send email digest."""
 
     if not RESEND_API_KEY:
@@ -244,8 +282,24 @@ def send_digest(days=1):
     documents = get_all_recent_documents(days)
 
     if not documents:
-        print("No new documents to report")
-        return True
+        if is_test:
+            # Send confirmation email for manual tests
+            try:
+                response = resend.Emails.send({
+                    "from": FROM_EMAIL,
+                    "to": [ALERT_EMAIL],
+                    "subject": "OSHA Monitor: Your alerts are working",
+                    "html": build_test_email_html(),
+                    "text": "Your OSHA Monitor email alerts are set up correctly. You'll receive updates when new regulations are published."
+                })
+                print(f"Test email sent successfully: {response}")
+                return True
+            except Exception as e:
+                print(f"Error sending test email: {e}")
+                return False
+        else:
+            print("No new documents to report")
+            return True
 
     # Build email content
     html_content = build_email_html(documents)
@@ -271,5 +325,7 @@ def send_digest(days=1):
 if __name__ == "__main__":
     # Run directly to send digest
     # LOOKBACK_DAYS env var allows manual test runs to look back further
+    # IS_TEST env var indicates a manual trigger (always sends confirmation)
     lookback = int(os.environ.get("LOOKBACK_DAYS", "1"))
-    send_digest(days=lookback)
+    is_test = os.environ.get("IS_TEST", "false").lower() == "true"
+    send_digest(days=lookback, is_test=is_test)
