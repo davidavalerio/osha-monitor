@@ -28,4 +28,6 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          # Manual triggers look back 7 days to ensure there's content to test with
+          LOOKBACK_DAYS: ${{ github.event_name == 'workflow_dispatch' && '7' || '1' }}
         run: python email_digest.py

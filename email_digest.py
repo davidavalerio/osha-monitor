@@ -270,4 +270,6 @@ def send_digest(days=1):
 
 if __name__ == "__main__":
     # Run directly to send digest
-    send_digest(days=1)
+    # LOOKBACK_DAYS env var allows manual test runs to look back further
+    lookback = int(os.environ.get("LOOKBACK_DAYS", "1"))
+    send_digest(days=lookback)
