@@ -202,7 +202,7 @@ def index():
     """Main page - show OSHA regulatory updates."""
 
     # Get filters from query params
-    content_filter = request.args.get("content", "all")
+    content_filter = request.args.get("content", "rules")
     year = request.args.get("year", str(datetime.now().year))
 
     # Fetch from all sources

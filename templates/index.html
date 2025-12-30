@@ -23,16 +23,17 @@
         <div class="filters">
             <div class="filter-row">
                 <span class="filter-label">Show:</span>
-                <a href="?content=all&year={{ year }}" class="filter-link {% if content_filter == 'all' %}active{% endif %}">All</a>
                 <a href="?content=rules&year={{ year }}" class="filter-link {% if content_filter == 'rules' %}active{% endif %}">Final Rules</a>
                 <a href="?content=proposed&year={{ year }}" class="filter-link {% if content_filter == 'proposed' %}active{% endif %}">Proposed</a>
                 <a href="?content=interpretations&year={{ year }}" class="filter-link {% if content_filter == 'interpretations' %}active{% endif %}">Interpretations</a>
                 <a href="?content=directives&year={{ year }}" class="filter-link {% if content_filter == 'directives' %}active{% endif %}">Directives</a>
+                <a href="?content=notices&year={{ year }}" class="filter-link {% if content_filter == 'notices' %}active{% endif %}">Notices</a>
             </div>
             <div class="filter-row">
                 <span class="filter-label">Year:</span>
                 <a href="?content={{ content_filter }}&year={{ current_year }}" class="filter-link {% if year == current_year|string %}active{% endif %}">{{ current_year }}</a>
                 <a href="?content={{ content_filter }}&year={{ current_year - 1 }}" class="filter-link {% if year == (current_year - 1)|string %}active{% endif %}">{{ current_year - 1 }}</a>
+                <a href="?content={{ content_filter }}&year={{ current_year - 2 }}" class="filter-link {% if year == (current_year - 2)|string %}active{% endif %}">{{ current_year - 2 }}</a>
                 <a href="?content={{ content_filter }}&year=all" class="filter-link {% if year == 'all' %}active{% endif %}">All Time</a>
             </div>
         </div>
@@ -158,7 +159,7 @@
         </section>
         {% endif %}
 
-        {% if notices and content_filter == 'all' %}
+        {% if notices %}
         <section class="rules-section">
             <h2>Notices</h2>
             <p class="section-description">Informational notices and announcements.</p>
